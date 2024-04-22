@@ -14,7 +14,7 @@ contract USDKEngine is ReentrancyGuard, Pausable, Ownable {
     error USDKEngine__HealthFactorFailed();
 
     USDK private usdk;
-    IERC20 private usdb;
+    address private usdb;
     uint256 private STAKING_REWARDS_PERCENTAGE = 1;
     address[] private users;
     uint256 private healthFactor;
@@ -22,7 +22,7 @@ contract USDKEngine is ReentrancyGuard, Pausable, Ownable {
     mapping(address => uint256) stakingAmount;
     mapping(address => uint256) stakingBlock;
 
-    constructor(USDK _usdk, IERC20 _usd) Ownable(msg.sender) {
+    constructor(USDK _usdk, address _usd) Ownable(msg.sender) {
         usdk = _usdk;
         usdb = _usd;
     }
@@ -59,14 +59,14 @@ contract USDKEngine is ReentrancyGuard, Pausable, Ownable {
 
     function mint(uint256 amount) public payable nonReentrant {
         if (amount < 0) revert USDKEngine__MintValueNeedtoMoreThanZero();
-        usdb.transferFrom(msg.sender, address(this), amount);
+        IERC20(usdb).transferFrom(msg.sender, address(this), amount);
         usdk.mint(msg.sender, amount);
     }
 
     function burn(uint256 amount) public nonReentrant {
         if (amount < 0) revert USDKEngine__ValueNeedToHaveMoreThenZero();
         usdk.burn(amount);
-        usdb.transferFrom(address(this), msg.sender, amount);
+        IERC20(usdb).transferFrom(address(this), msg.sender, amount);
     }
 
     // TODO
@@ -76,7 +76,7 @@ contract USDKEngine is ReentrancyGuard, Pausable, Ownable {
         if (amount < (stakingAmount[msg.sender] * 100) / 90) revert USDKEngine__BorrowValueLimitation();
         (bool successTransferFrom) = usdk.transferFrom(msg.sender, address(this), amount);
         require(successTransferFrom, "failed to transferFrom");
-        (bool successTransfer) = usdb.transfer(msg.sender, amount);
+        (bool successTransfer) = IERC20(usdb).transfer(msg.sender, amount);
         require(successTransfer, "failed to transferFrom");
     }
 
