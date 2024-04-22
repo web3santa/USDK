@@ -8,7 +8,7 @@ import {ERC20Burnable} from "@openzeppelin/contracts/token/ERC20/extensions/ERC2
 contract USDK is ERC20, Ownable, ERC20Burnable {
     constructor() ERC20("USDK", "USDK") Ownable(msg.sender) {}
 
-    function mint(address minter, uint256 amount) public payable onlyOwner {
+    function mint(address minter, uint256 amount) public onlyOwner {
         _mint(minter, amount);
     }
 }
